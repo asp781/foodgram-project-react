@@ -1,10 +1,11 @@
 from rest_framework import serializers
+
 from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
 from drf_extra_fields.fields import Base64ImageField
 
-from users.models import User
 from recipes.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
                             ShoppingCart, Subscription, Tag)
+from users.models import User
 
 
 class UserListRetrieveSerializer(serializers.ModelSerializer):
@@ -137,37 +138,36 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         return self.__is_something(obj, ShoppingCart)
 
     def create(self, validated_data):
-        print(validated_data)
-        ingredients2 = validated_data.pop('ingredients')
+        ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
-        print(validated_data)
         obj = Recipe.objects.create(**validated_data)
         obj.tags.set(tags)
-        for ingredient1 in ingredients2:
-            IngredientRecipe.objects.create(
+        ingredient_recipe = [IngredientRecipe(
                 recipes=obj,
-                ingredients=ingredient1['id'],
-                amount=ingredient1['amount']
-            )
+                ingredients=ingredient['id'],
+                amount=ingredient['amount']) for ingredient in ingredients]
+        IngredientRecipe.objects.bulk_create(ingredient_recipe)
         return obj
 
     def update(self, instance, validated_data):
-        print(validated_data)
-        ingredients2 = validated_data.pop('ingredients')
+        ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         for field, value in validated_data.items():
             setattr(instance, field, value)
         instance.save()
         instance.tags.set(tags)
         instance.ingredients.clear()
-        for ingredient1 in ingredients2:
-            IngredientRecipe.objects.create(
+        ingredient_recipe = [IngredientRecipe(
                 recipes=instance,
-                ingredients=ingredient1['id'],
-                amount=ingredient1['amount']
-            )
-
+                ingredients=ingredient['id'],
+                amount=ingredient['amount']) for ingredient in ingredients]
+        IngredientRecipe.objects.bulk_create(ingredient_recipe)
         return instance
+
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        context = {'request': request}
+        return RecipeSerializer(instance, context=context).data
 
     def validate_cooking_time(self, value):
         if value <= 0:

@@ -45,10 +45,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.request.method == 'GET':
             return RecipeSerializer
-        if self.request.method == 'POST':
-            return RecipeCreateSerializer
-        if self.request.method == 'PATCH':
-            return RecipeCreateSerializer
+        return RecipeCreateSerializer
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -57,12 +54,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def favorite(self, request, pk=None):
         user = request.user
         recipe = get_object_or_404(Recipe, pk=pk)
-        if Favorite.objects.filter(user=user, recipe=recipe).exists():
+        queryset, created = Favorite.objects. get_or_create(
+            user=user, recipe=recipe
+        )
+        if not created:
             return Response({'errors':
                             'Рецепт уже у вас в избранном.'},
                             status=status.HTTP_400_BAD_REQUEST)
-        Favorite.objects.create(user=user, recipe=recipe)
-        queryset = Favorite.objects.get(user=request.user.id, recipe=recipe.id)
         serializer = FavoriteSerializer(queryset, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -70,24 +68,24 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def favorite_del(self, request, pk=None):
         user = request.user
         recipe = get_object_or_404(Recipe, pk=pk)
-        if not Favorite.objects.filter(user=user, recipe=recipe).exists():
+        favorite = Favorite.objects.filter(user=user, recipe=recipe)
+        if not favorite.exists():
             return Response({'errors': 'Этого рецепта нет в избранном.'},
                             status=status.HTTP_400_BAD_REQUEST)
-        Favorite.objects.get(user=user, recipe=recipe).delete()
+        favorite.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=['post'])
     def shopping_cart(self, request, pk=None):
         user = request.user
         recipe = get_object_or_404(Recipe, pk=pk)
-        if ShoppingCart.objects.filter(user=user, recipe=recipe).exists():
+        queryset, created = ShoppingCart.objects.get_or_create(
+            user=user, recipe=recipe
+        )
+        if not created:
             return Response({'errors':
                             'Рецепт уже у вас в список покупок.'},
                             status=status.HTTP_400_BAD_REQUEST)
-        ShoppingCart.objects.create(user=user, recipe=recipe)
-        queryset = ShoppingCart.objects.get(
-            user=request.user.id, recipe=recipe.id
-        )
         serializer = ShoppingCartSerializer(
             queryset, context={'request': request}
         )
@@ -97,10 +95,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def shopping_cart_del(self, request, pk=None):
         user = request.user
         recipe = get_object_or_404(Recipe, pk=pk)
-        if not ShoppingCart.objects.filter(user=user, recipe=recipe).exists():
-            return Response({'errors': 'Этого рецепта нет в избранном.'},
+        shopping_cart = ShoppingCart.objects.filter(user=user, recipe=recipe)
+        if not shopping_cart.exists():
+            return Response({'errors': 'Этого рецепта нет в списке покупок.'},
                             status=status.HTTP_400_BAD_REQUEST)
-        ShoppingCart.objects.get(user=user, recipe=recipe).delete()
+        shopping_cart.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def make_pdf(self, header, data, filename, http_status):
@@ -156,8 +155,7 @@ class SubscriptionViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
-        follower = self.request.user
-        return Subscription.objects.filter(follower=follower)
+        return self.request.user.follower.all()
 
 
 class SubscribeViewSet(viewsets.ModelViewSet):
@@ -173,16 +171,13 @@ class SubscribeViewSet(viewsets.ModelViewSet):
             return Response({'errors':
                             'Вы не можете подписаться на себя.'},
                             status=status.HTTP_400_BAD_REQUEST)
-        if Subscription.objects.filter(
+        queryset, created = Subscription.objects.get_or_create(
             follower=follower, author=author
-        ).exists():
+        )
+        if not created:
             return Response({'errors':
                             'Вы уже подписаны на автора.'},
                             status=status.HTTP_400_BAD_REQUEST)
-        Subscription.objects.create(follower=follower, author=author)
-        queryset = Subscription.objects.get(
-            follower=request.user.id, author=author.id
-        )
         serializer = SubscriptionSerializer(
             queryset, context={'request': request}
         )
@@ -192,10 +187,11 @@ class SubscribeViewSet(viewsets.ModelViewSet):
     def subscribe_del(self, request, pk=None):
         follower = request.user
         author = get_object_or_404(User, pk=pk)
-        if not Subscription.objects.filter(
+        subscription = Subscription.objects.filter(
             follower=follower, author=author
-        ).exists():
+        )
+        if not subscription.exists():
             return Response({'errors': 'Вы не подписаны на автора.'},
                             status=status.HTTP_400_BAD_REQUEST)
-        Subscription.objects.get(follower=follower, author=author).delete()
+        subscription.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
