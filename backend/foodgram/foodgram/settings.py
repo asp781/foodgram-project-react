@@ -21,7 +21,7 @@ SECRET_KEY = '&zkebbnwn-jufksp2g@k%uy3dl-v^bllb)pnxqzl)ewcm7m5f3'
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 INSTALLED_APPS = [
@@ -76,17 +76,27 @@ TEMPLATES = [
 WSGI_APPLICATION = 'foodgram.wsgi.application'
 
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'postgres3',
+#         'USER': 'postgres',
+#         'PASSWORD': '1234',
+#         'HOST': '127.0.0.1',
+#         'PORT': '5432',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres3',
-        'USER': 'postgres',
-        'PASSWORD': '1234',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'ENGINE': os.getenv('DB_ENGINE'),
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT')
     }
 }
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -115,9 +125,13 @@ USE_L10N = True
 USE_TZ = False
 
 
+# STATICFILES_DIRS необходимо закомментировать или удалить
+# STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
 STATIC_URL = '/static/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 
 
 REST_FRAMEWORK = {
@@ -126,7 +140,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend'

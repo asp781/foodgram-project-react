@@ -39,3 +39,4 @@ tomli==2.0.1
 tzdata==2022.7
 uritemplate==4.1.1
 urllib3==1.26.13
+gunicorn==20.0.4

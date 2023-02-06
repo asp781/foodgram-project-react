@@ -27,7 +27,7 @@ urlpatterns = [
     path('api/', include('djoser.urls')),
     re_path(r'^api/auth/', include('djoser.urls.authtoken')),
     path('api/', include(router.urls)),
-    path('api/v1/drf-auth/', include('rest_framework.urls')),
+    # path('api/v1/drf-auth/', include('rest_framework.urls')),
 ]
 
 
