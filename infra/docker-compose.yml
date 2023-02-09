@@ -9,18 +9,14 @@ services:
       - ./.env
 
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: asp781/fg_frontend:v1
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
       - db
 
   backend:
-    build:
-      context: ../backend/foodgram/
-      dockerfile: Dockerfile
+    image: asp781/fg_backend:v1
     restart: always
     volumes:
       - static_value:/app/static/

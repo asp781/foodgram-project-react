@@ -8,16 +8,15 @@ from rest_framework import routers
 from django.conf import settings
 from django.conf.urls.static import static
 
+
 router = routers.DefaultRouter()
 router.register('tags', TagViewSet)
 router.register('ingredients', IngredientViewSet)
 router.register('recipes', RecipeViewSet)
 router.register('users', SubscribeViewSet)
 
-
 admin.site.site_header = 'Продуктовый помощник'
 admin.site.index_title = 'Панель администратора'
-
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,9 +26,7 @@ urlpatterns = [
     path('api/', include('djoser.urls')),
     re_path(r'^api/auth/', include('djoser.urls.authtoken')),
     path('api/', include(router.urls)),
-    # path('api/v1/drf-auth/', include('rest_framework.urls')),
 ]
-
 
 if settings.DEBUG:
     urlpatterns += static(

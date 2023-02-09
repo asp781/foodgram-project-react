@@ -1,6 +1,9 @@
 import os
-from fpdf import FPDF
+import fpdf
 from foodgram.settings import BASE_DIR
+
+
+fpdf.set_global("FPDF_CACHE_MODE", 1)
 
 
 class Constant:
@@ -10,7 +13,7 @@ class Constant:
     DR_FOOTER = 4
 
 
-class PDFMarker(FPDF):
+class PDFMarker(fpdf.FPDF):
     font_regular_name = 'DejaVuSansCondensed.ttf'
     font_regular_family = 'DejaVu'
     font_bold_family = 'DejaVuBold'
