@@ -27,7 +27,8 @@ cd /d/Dev/foodgram-project-react
 ```
 Копируем директорию infra на сервер
 ```
-scp -r infra/ asp78@51.250.73.251:```
+scp -r infra/ asp78@51.250.73.251:
+```
 
 Заходим на сервер
 ```
