@@ -68,9 +68,9 @@ python manage.py loaddata fixtures.json
 python manage.py collectstatic --no-input
 ```
 Теперь проект доступен по адресу
-```
+
 http://51.250.73.251/
-```
+
 
 ## Технологии:
 - Python 3.8
