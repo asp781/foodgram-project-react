@@ -30,12 +30,11 @@ cd /d/Dev/foodgram-project-react
 scp -r infra/ asp78@51.250.73.251:
 scp -r docs/ asp78@51.250.73.251:
 ```
-
 Заходим на сервер
 ```
 ssh asp78@51.250.73.251
 ```
-Устанавливаем:
+Устанавливаем на сервере:
 ```
 sudo apt install docker.io
 ```
@@ -46,27 +45,25 @@ sudo apt install docker-compose
 ```
 cd infra
 ```
-Загружаем образы с DockerHub
+Загружаем образы с DockerHub:
 ```
 sudo docker-compose pull
 ```
-Создаем контейнеры
+Создаем контейнеры:
 ```
-sudo docker-compose up
+sudo docker-compose up -d
 ```
-Зажодим в контейнер backend
+Выполняем миграции:
 ```
-sudo docker exec -it infra_backend_1 bash
+sudo docker-compose exec backend python manage.py migrate
 ```
-Выполняем внутри контейнера:
+Заполняем базу тестовыми данными:
 ```
-python manage.py migrate
+sudo docker-compose exec backend python manage.py loaddata fixtures.json
 ```
+Собираем статику:
 ```
-python manage.py loaddata fixtures.json
-```
-```
-python manage.py collectstatic --no-input
+sudo docker-compose exec backend python manage.py collectstatic --no-input
 ```
 Теперь проект доступен по адресу
 
